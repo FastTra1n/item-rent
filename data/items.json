@@ -1,68 +1,9 @@
 [
     {
         "id": 1,
-        "name": "Перфоратор Makita HR2470",
-        "price": 400,
-        "deposit": 5000
-    },
-    {
-        "id": 2,
-        "name": "Моющий пылесос Karcher Puzzi 10/1",
-        "price": 1000,
-        "deposit": 15000
-    },
-    {
-        "id": 3,
-        "name": "Игровая приставка Sony PlayStation 5",
-        "price": 1200,
-        "deposit": 30000
-    },
-    {
-        "id": 4,
-        "name": "Палатка туристическая 4-местная Tramp",
+        "owner_id": 1,
+        "name": "Снеговая лопата",
         "price": 500,
-        "deposit": 6000
-    },
-    {
-        "id": 5,
-        "name": "SUP-борд Gladiator Pro 10.6",
-        "price": 900,
-        "deposit": 20000
-    },
-    {
-        "id": 6,
-        "name": "Электросамокат Ninebot KickScooter Max",
-        "price": 800,
-        "deposit": 25000
-    },
-    {
-        "id": 7,
-        "name": "Проектор Xiaomi Mi Smart Projector 2",
-        "price": 700,
-        "deposit": 18000
-    },
-    {
-        "id": 8,
-        "name": "Строительный фен Bosch GHG 20-63",
-        "price": 300,
-        "deposit": 3000
-    },
-    {
-        "id": 9,
-        "name": "Велосипед горный Stern Motion 2.0",
-        "price": 600,
-        "deposit": 12000
-    },
-    {
-        "id": 10,
-        "name": "Робот-мойщик окон Hobot 388",
-        "price": 800,
-        "deposit": 14000
-    },
-    {
-        "id": 11,
-        "name": "Бензопила Stihl MS 180",
-        "price": 700,
-        "deposit": 9000
+        "deposit": 5000
     }
 ]
