@@ -64,7 +64,7 @@ def save_users(filename: str, users: list[User]) -> None:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
-def load_bookings(filename: str, items: list[Item], users: list[User]) -> list[dict]:
+def load_bookings(filename: str, items: list[Item], users: list[User]) -> list[Booking]:
     """Загрузить бронирования из JSON-файла."""
     bookings = []
     try:
