@@ -1,25 +1,29 @@
-from datetime import date
+from datetime import UTC, datetime
+
 from django.http import HttpResponse
-from django.shortcuts import render
 
 from homepage.views import page
 from models.bookings import is_item_available
 from models.items import find_item_by_id
 from storage import load_bookings, load_items, load_users
 
+
 def items_list(request):
-    items = ''
+    items = ""
     users_list = load_users("data/users.json")
     items_list = load_items("data/items.json", users_list)
     for item in items_list:
-        text = f"{item.name} - {item.price} руб./д." 
-        items += f'<li class="list-group-item"><a href="/items/{item.id}/">{text}</a></li>'
+        text = f"{item.name} - {item.price} руб./д."
+        items += (
+            f'<li class="list-group-item"><a href="/items/{item.id}/">{text}</a></li>'
+        )
 
     content = f"""
     <h1>Каталог вещей</h1>
     <ul class="list-group">{items}</ul>
     """
     return HttpResponse(page("Вещи для аренды", content))
+
 
 def item_detail(request, item_id):
     users_list = load_users("data/users.json")
@@ -33,8 +37,10 @@ def item_detail(request, item_id):
         """
         return HttpResponse(page("Вещь не найдена", content), status=404)
 
-    bookings_list = load_bookings('data/bookings.json', items_list, users_list)
-    available = is_item_available(bookings_list, item_id, date.today(), date.today())
+    bookings_list = load_bookings("data/bookings.json", items_list, users_list)
+    available = is_item_available(
+        bookings_list, item_id, datetime.now(tz=UTC).date(), datetime.now(tz=UTC).date()
+    )
     status = "доступно" if available else "забронировано"
     badge = "bg-success" if available else "bg-danger"
 
@@ -51,4 +57,3 @@ def item_detail(request, item_id):
     </div>
     """
     return HttpResponse(page(item.name, content), status=200)
-        

@@ -1,8 +1,10 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+
 
 def page(title, content):
-    bootstrap = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css'
+    bootstrap = (
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    )
     return f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -20,6 +22,7 @@ def page(title, content):
   <main class="container">{content}</main>  
 </body>
 </html>"""
+
 
 def index(request):
     content = """ 
