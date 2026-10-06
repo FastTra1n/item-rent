@@ -66,6 +66,13 @@ def cancel_booking(bookings: list[Booking], booking_id: int) -> bool:
     return False
 
 
+def find_booking_by_id(bookings: list[Booking], booking_id: int) -> Booking | None:
+    for booking in bookings:
+        if booking.id == booking_id:
+            return booking
+    return None
+
+
 def get_booking_status(is_available: bool) -> str:
     """Вернуть текстовый статус вещи."""
     if is_available:
