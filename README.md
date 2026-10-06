@@ -1,6 +1,7 @@
 # Сервис аренды вещей
 
 ![Python](https://img.shields.io/badge/python-%233670A0.svg?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
 ![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=2f9fe3)
 ![uv](https://img.shields.io/badge/uv-%23DE5FE9.svg?style=for-the-badge&logo=uv&logoColor=white)
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
@@ -20,6 +21,15 @@
 - Отображение списка всех пользователей системы
 - Добавить нового пользователя в систему
 - Нахождение конкретного пользователя по его уникальному идентификатору
+
+## Используемые технологии
+
+- Python 3;
+- Django 5.2 - веб-фреймворк;
+- HTML - разметка веб-страниц;
+- CSS и Bootstrap 5.3 - оформление страниц;
+- pytest - автоматизированные тесты;
+- ruff - проверка качества кода.
 
 ## Целевая аудитория
 
@@ -79,6 +89,14 @@
 - `cancel()` – отмена аренды;
 - `__str__()` – строковое представление аренды.
 
+## Страницы веб-интерфейса
+
+- `/` - главная страница: описание приложения и навигация (view-функция `index()`);
+- `/items/` - каталог вещей: объекты `Item` из `data/items.json` (view-функция `items_list()`);
+- `/items/<int:item_id>/` - страница конкретной вещи (view-функция `item_detail()`);
+- `/bookings/` - список бронирований: объекты `Booking` из `data/bookings.json` (view-функция `bookings_list()`);
+- `/bookings/<int:booking_id>/` - страница бронирования (view-функция `booking_detail()`).
+
 ## Основные операции
 
 ### Работа с вещами
@@ -114,15 +132,48 @@
 
 ```
 item-rent/
+├─ bookings/
+│  ├─ migrations/
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
 ├─ data/
 │  ├─ bookings.json
 │  ├─ items.json
 │  └─ users.json
+├─ homepage/
+│  ├─ migrations/
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
+├─ items/
+│  ├─ migrations/
+│  ├─ __init__.py
+│  ├─ admin.py
+│  ├─ apps.py
+│  ├─ models.py
+│  ├─ tests.py
+│  ├─ urls.py
+│  └─ views.py
 ├─ models/
 │  ├─ __init__.py
 │  ├─ bookings.py
 │  ├─ items.py
 │  └─ users.py
+├─ rently/
+│  ├─ __init__.py
+│  ├─ asgi.py
+│  ├─ settings.py
+│  ├─ urls.py
+│  └─ wsgi.py
 ├─ tests/
 │  ├─ test_bookings.py
 │  └─ test_items.py
@@ -130,6 +181,7 @@ item-rent/
 ├─ .python-version
 ├─ 8.0
 ├─ main.py
+├─ manager.py
 ├─ pyproject.toml
 ├─ pytest.ini
 ├─ README.md
@@ -144,17 +196,42 @@ item-rent/
 
 Основная точка входа в приложение, отвечающая за запуск приложения, отображение меню с выбором доступных опций и вызов методов с логикой из основных модулей.
 
-### `items.py`
+### `rently/`
 
-Содержит класс `Item` и функции для работы с вещами.
+Пакет настроек Django-проекта:
 
-### `bookings.py`
+- `settings.py` - настройки проекта;
+- `urls.py` - маршрутизация верхнего уровня;
+- `asgi.py`, `wsgi.py` - точки взаимодействия с сервером.
 
-Содержит класс `Booking` и функции для работы с бронированиями.
+### `homepage/`
 
-### `users.py`
+Django-приложение главной страницы:
 
-Содержит класс `User` и функции для работы с пользователями.
+- `views.py` – функция `page()` (общий HTML-каркас) и view-функция `index()`;
+- `urls.py` – маршрут главной страницы.
+
+### `items/`
+
+Django-приложение каталога вещей:
+
+- `views.py` – view-функции `items_list()` и `item_detail()`;
+- `urls.py` – маршруты приложения;
+
+### `bookings/`
+
+Django-приложение системы бронирования:
+
+- `views.py` – view-функции `bookings_list()` и `booking_detail()`;
+- `urls.py` – маршруты приложения;
+
+### `models/`
+
+Классы предметной области и функции работы с ними:
+
+- `items.py` – класс `Item` и функции работы с вещами;
+- `users.py` – класс `User` и функции работы с пользователями;
+- `bookings.py` – класс `Booking` и функции работы с бронированиями.
 
 ### `storage.py`
 
@@ -174,6 +251,7 @@ item-rent/
 ## Требования для запуска проекта
 
 - Python 3.x;
+- Django 5.2.x;
 - pytest;
 - ruff.
 
@@ -188,6 +266,26 @@ uv sync
 cd ./item-rent
 .venv\Scripts\activate
 pip install .
+```
+
+## Запуск приложения
+
+Веб-версия (Django):
+
+```bash
+python manage.py runserver
+```
+
+После этого необходимо открыть в браузере адрес:
+
+```text
+http://127.0.0.1:8000/
+```
+
+Консольная версия (CLI):
+
+```bash
+python main.py
 ```
 
 ## Запуск тестов
@@ -212,11 +310,19 @@ git status
 
 ## План развития
 
-На следующих этапах планируется:
+### Реализовано (ПР5):
 
-- разработка веб-приложения;
-- подключение базы данных;
-- реализация пользователей;
-- разработка API;
-- контейнеризация приложения;
-- настройка CI/CD.
+- Django-проект и три приложения (`homepage`, `items`, `bookings`);
+- Двухуровневая маршрутизация URL;
+- Отображение вещей и бронирований из JSON-файлов через view-функции;
+- Проверка доступности вещей на текущую дату;
+- Интеграция стилей Bootstrap.
+
+### Планируется:
+
+- Перенос сущностей `Item`, `User` и `Booking` в Django ORM и создание моделей базы данных;
+- Переход от формирования HTML-строк в Python к шаблонам (`templates/` и `render()`);
+- Разработка HTML-форм для добавления и бронирования вещей;
+- Разработка API;
+- Контейнеризация приложения;
+- Настройка CI/CD.
