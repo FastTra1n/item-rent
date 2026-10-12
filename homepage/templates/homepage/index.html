@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+  <div class="container-fluid py-5">
+    <h1 class="display-4">Rently</h1>
+    <p class="fs-4 pb-5">Система бронирования вещей.</p>
+    <a href="{% url 'items:list' %}" class="btn btn-primary btn-lg me-2"
+      >Вещи</a
+    >
+    <a href="{% url 'bookings:bookings' %}" class="btn btn-secondary btn-lg"
+      >Бронирования</a
+    >
+  </div>
+</div>
+{% endblock %}

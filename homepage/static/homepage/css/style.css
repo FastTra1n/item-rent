@@ -1,0 +1,22 @@
+body {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.item-card {
+  transition: transform 0.2s;
+}
+
+.item-card:hover {
+  transform: translateY(-3px);
+}
+
+.booking-status {
+  font-weight: 600;
+}
+
+.rently-logo {
+  width: 90px;
+  height: auto;
+  margin: 1rem 0;
+}
