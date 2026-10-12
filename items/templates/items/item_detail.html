@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if item %}
+    {{ item.name }}
+  {% else %}
+    Вещь не найдена
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if item %}
+  <div class="card shadow">
+    <div class="card-body">
+      <h1 class="card-title">{{ item.name|default:"Без названия" }}</h1>
+      <p class="card-text">Цена аренды: <strong>{{ item.price }} руб./д.</strong></p>
+        <p class="card-text">Залоговая стоимость: <strong>{{ item.deposit }} руб.</strong></p>
+        <p class="card-text">Доступность на сегодня: <span class="badge {{ badge }}">{{ status }}</span></p>
+        <p class="card-text">Владелец: {{ item.owner.name }} (Рейтинг: {{ item.owner.rating }}) | {{ item.owner.phone }}</span></p>
+      <a href="{% url 'items:list' %}" class="btn btn-outline-secondary mt-3">← К каталогу вещей</a>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-danger">
+    <h1 class="text-danger">Вещь не найдена</h1>
+    <p>Вещь с указанным идентификатором отсутствует в базе данных.</p>
+    <a href="{% url 'items:list' %}" class="btn btn-outline-secondary mt-3">← К каталогу вещей</a>
+  </div>
+{% endif %}
+{% endblock %}

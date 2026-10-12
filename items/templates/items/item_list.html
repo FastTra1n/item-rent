@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Вещи для аренды{% endblock %}
+
+{% block content %}
+<h1>Каталог вещей</h1>
+<p class="text-muted">Всего вещей: {{ items|length }}</p>
+
+<div class="row">
+  {% for item in items %}
+    {% include "items/includes/item_card.html" %}
+  {% empty %}
+  <div class="col-12">
+    <p class="alert alert-warning">Вещи в каталоге не найдены.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
