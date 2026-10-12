@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Бронирования{% endblock %}
+
+{% block content %}
+<h1>Список бронирований</h1>
+<p class="text-muted">Всего бронирований: {{ bookings|length }}</p>
+
+<ul class="list-group">
+  {% for booking in bookings %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <a
+          href="{% url 'bookings:detail' booking.id %}"
+          class="text-decoration-none fw-bold"
+        >
+          Бронирование №{{ booking.id }}
+        </a>
+        <span class="text-muted ms-2"
+          >({{ booking.item.name }} c {{ booking.start_date|date:"d.m.Y" }} по {{ booking.end_date|date:"d.m.Y" }})</span
+        >
+      </div>
+      {% include "bookings/includes/booking_status.html" %}
+    </li>
+  {% empty %}
+    <li class="list-group-item">
+      <p class="alert alert-warning mb-0">Бронирования не найдены.</p>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}
