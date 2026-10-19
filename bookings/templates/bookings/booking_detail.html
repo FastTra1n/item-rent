@@ -13,10 +13,10 @@
   <div class="card shadow">
     <div class="card-body">
       <h1 class="card-title">Бронирование №{{ booking.id }}</h1>
-      <p class="card-text">Забронированная вещь: {{ booking.item.name }}</p>
+      <p class="card-text">Забронированная вещь: {{ booking.item_name }}</p>
       <p class="card-text">Дата начала бронирования: {{ booking.start_date }}</p>
       <p class="card-text">Дата окончания бронирования: {{ booking.end_date }}</p>
-      <p class="card-text">Арендатор: {{ booking.user.name }}</p>
+      <p class="card-text">Арендатор: {{ booking.user_name }}</p>
       <p class="card-text">Статус: {% include "bookings/includes/booking_status.html" %}</p>
       <a href="{% url 'bookings:bookings' %}" class="btn btn-outline-secondary mt-3">← К списку бронирований</a>
     </div>

@@ -17,7 +17,7 @@
           Бронирование №{{ booking.id }}
         </a>
         <span class="text-muted ms-2"
-          >({{ booking.item.name }} c {{ booking.start_date|date:"d.m.Y" }} по {{ booking.end_date|date:"d.m.Y" }})</span
+          >({{ booking.item_name }} c {{ booking.start_date_display }} по {{ booking.end_date_display }})</span
         >
       </div>
       {% include "bookings/includes/booking_status.html" %}
