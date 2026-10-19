@@ -16,7 +16,7 @@
       <p class="card-text">Цена аренды: <strong>{{ item.price }} руб./д.</strong></p>
         <p class="card-text">Залоговая стоимость: <strong>{{ item.deposit }} руб.</strong></p>
         <p class="card-text">Доступность на сегодня: <span class="badge {{ badge }}">{{ status }}</span></p>
-        <p class="card-text">Владелец: {{ item.owner.name }} (Рейтинг: {{ item.owner.rating }}) | {{ item.owner.phone }}</span></p>
+        <p class="card-text">Владелец: {{ item.owner_name }} (Рейтинг: {{ item.owner_rating }}) | {{ item.owner_phone }}</span></p>
       <a href="{% url 'items:list' %}" class="btn btn-outline-secondary mt-3">← К каталогу вещей</a>
     </div>
   </div>

@@ -1,30 +1,64 @@
 from datetime import UTC, datetime
+import sqlite3
 
 from django.shortcuts import render
 
-from models.bookings import is_item_available
-from models.items import find_item_by_id
-from storage import load_bookings, load_items, load_users
+from db.database import get_connection
 
+DB_PATH = "data/rently.sqlite"
 
 def items_list(request):
-    users_list = load_users("data/users.json")
-    items_list = load_items("data/items.json", users_list)
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+
+    items = conn.execute("""
+        SELECT
+          id,
+          name
+        FROM items
+        ORDER BY name;
+    """).fetchall()
+    conn.close()
+
     context = {
-        "items": items_list,
+        "items": items,
     }
 
     return render(request, "items/item_list.html", context)
 
 def item_detail(request, item_id):
-    users_list = load_users("data/users.json")
-    items_list = load_items("data/items.json", users_list)
-    item = find_item_by_id(items_list, item_id)
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
 
-    bookings_list = load_bookings("data/bookings.json", items_list, users_list)
-    available = is_item_available(
-        bookings_list, item_id, datetime.now(tz=UTC).date(), datetime.now(tz=UTC).date()
-    )
+    item = conn.execute("""
+        SELECT
+          items.id,
+          items.name,
+          items.price,
+          items.deposit,
+          users.name AS owner_name,
+          users.phone AS owner_phone,
+          users.rating AS owner_rating
+        FROM items
+        JOIN users ON items.owner_id = users.id
+        WHERE items.id = ?;
+    """, [item_id]).fetchone()
+
+    if item is None:
+        conn.close()
+        return render(request, "items/item_detail.html", context={}, status=404)
+
+    today = datetime.now(tz=UTC).date().isoformat()
+    active_booking = conn.execute("""
+        SELECT 1
+        FROM bookings
+        WHERE item_id = ?
+          AND is_cancelled = 0
+          AND ? BETWEEN start_date AND end_date;
+    """, [item_id, today]).fetchone()
+    conn.close()
+
+    available = active_booking is None
     status = "доступно" if available else "забронировано"
     badge = "bg-success" if available else "bg-danger"
     context = {
@@ -33,4 +67,4 @@ def item_detail(request, item_id):
         "badge": badge,
     }
 
-    return render(request, "items/item_detail.html", context, status=404 if item is None else 200)
+    return render(request, "items/item_detail.html", context, status=200)
