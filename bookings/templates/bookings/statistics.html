@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+
+<h1 class="mb-5">Статистика аренды</h1>
+<div class="row">
+  <div class="col-md-3">
+    <div class="card text-bg-primary mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Вещей в каталоге</h5>
+        <p class="fs-2 mb-0">{{ summary.items_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-secondary mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Пользователей</h5>
+        <p class="fs-2 mb-0">{{ summary.users_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-success mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Активных броней</h5>
+        <p class="fs-2 mb-0">{{ summary.active_bookings_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-warning mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Отменённые брони</h5>
+        <p class="fs-2 mb-0">{{ summary.cancelled_bookings_count }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card mb-4">
+  <div class="card-body">
+    Средняя цена аренды: <strong>{{ summary.avg_price }} руб./д.</strong>,
+    минимальная: {{ summary.min_price }} руб.,
+    максимальная: {{ summary.max_price }} руб./д.
+    Суммарный залог по каталогу: {{ summary.total_deposit }} руб.
+  </div>
+</div>
+
+<h2>Активные бронирования по вещам</h2>
+<table class="table table-striped align-middle">
+  <thead>
+    <tr>
+      <th scope="col">Вещь</th>
+      <th scope="col">Активных бронирований</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in per_item %}
+      <tr>
+        <td>{{ row.item_name }}</td>
+        <td>{{ row.bookings_count }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="2">Данные отсутствуют.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Популярные вещи</h2>
+<table class="table table-striped align-middle">
+  <thead>
+    <tr>
+      <th scope="col">Вещь</th>
+      <th scope="col">Активных бронирований</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in popular %}
+      <tr>
+        <td>{{ row.item_name }}</td>
+        <td>{{ row.bookings_count }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="2">
+          Ни одна вещь пока не набрала двух активных бронирований.
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Активные бронирования по пользователям</h2>
+<table class="table table-striped align-middle">
+  <thead>
+    <tr>
+      <th scope="col">Пользователь</th>
+      <th scope="col">Активных бронирований</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in per_user %}
+      <tr>
+        <td>{{ row.user_name }}</td>
+        <td>{{ row.bookings_count }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="2">Данные отсутствуют.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Самые дорогие вещи каталога</h2>
+<table class="table table-striped align-middle">
+  <thead>
+    <tr>
+      <th scope="col">Вещь</th>
+      <th scope="col">Цена, руб./д.</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in top_expensive %}
+      <tr>
+        <td>{{ row.name }}</td>
+        <td>{{ row.price }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="2">Каталог пуст.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
