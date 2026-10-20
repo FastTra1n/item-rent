@@ -1,12 +1,14 @@
-from django.shortcuts import render
 import sqlite3
 
+from django.shortcuts import render
+
 from db.database import get_connection
+
 
 def bookings_list(request):
     conn = get_connection()
     conn.row_factory = sqlite3.Row
-    
+
     bookings = conn.execute("""
         SELECT
           bookings.id,
@@ -21,11 +23,11 @@ def bookings_list(request):
         ORDER BY bookings.id DESC;
     """).fetchall()
     conn.close()
-    
+
     context = {
         "bookings": bookings,
     }
-    
+
     return render(request, "bookings/booking_list.html", context)
 
 
@@ -33,7 +35,8 @@ def booking_detail(request, booking_id):
     conn = get_connection()
     conn.row_factory = sqlite3.Row
 
-    booking = conn.execute("""
+    booking = conn.execute(
+        """
         SELECT
           bookings.id,
           bookings.start_date,
@@ -45,7 +48,9 @@ def booking_detail(request, booking_id):
         JOIN items ON bookings.item_id = items.id
         JOIN users ON bookings.user_id = users.id
         WHERE bookings.id = ?;
-    """, [booking_id]).fetchone()
+    """,
+        [booking_id],
+    ).fetchone()
     conn.close()
 
     if booking is None:
@@ -56,6 +61,7 @@ def booking_detail(request, booking_id):
     }
 
     return render(request, "bookings/booking_detail.html", context, status=200)
+
 
 def statistics(request):
     conn = get_connection()
@@ -166,5 +172,5 @@ def statistics(request):
         "per_user": per_user,
         "top_expensive": top_expensive,
     }
-    
+
     return render(request, "bookings/statistics.html", context)

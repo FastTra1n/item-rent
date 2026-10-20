@@ -1,14 +1,17 @@
 import json
 import sqlite3
+
 from db.database import get_connection
 
-ITEMS_FILE = "data/items.json" 
-USERS_FILE = "data/users.json" 
-BOOKINGS_FILE = "data/bookings.json" 
+ITEMS_FILE = "data/items.json"
+USERS_FILE = "data/users.json"
+BOOKINGS_FILE = "data/bookings.json"
 
-def load_json(filename: str) -> list[dict]: 
-    with open(filename, encoding="utf-8") as file: 
-        return json.load(file) 
+
+def load_json(filename: str) -> list[dict]:
+    with open(filename, encoding="utf-8") as file:
+        return json.load(file)
+
 
 def import_users(conn: sqlite3.Connection) -> None:
     users = load_json(USERS_FILE)
@@ -33,8 +36,9 @@ def import_users(conn: sqlite3.Connection) -> None:
         ],
     )
 
-def import_items(conn: sqlite3.Connection) -> None: 
-    items = load_json(ITEMS_FILE) 
+
+def import_items(conn: sqlite3.Connection) -> None:
+    items = load_json(ITEMS_FILE)
     conn.executemany(
         """
         INSERT INTO items (
@@ -57,6 +61,7 @@ def import_items(conn: sqlite3.Connection) -> None:
             for item in items
         ],
     )
+
 
 def import_bookings(conn: sqlite3.Connection) -> None:
     bookings = load_json(BOOKINGS_FILE)
@@ -85,18 +90,20 @@ def import_bookings(conn: sqlite3.Connection) -> None:
         ],
     )
 
-def main(): 
-    conn = get_connection() 
-    try: 
+
+def main():
+    conn = get_connection()
+    try:
         import_users(conn)
-        import_items(conn) 
-        import_bookings(conn) 
-        conn.commit() 
-    except Exception: 
-        conn.rollback() 
-        raise 
-    finally: 
+        import_items(conn)
+        import_bookings(conn)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
         conn.close()
 
-if __name__ == "__main__": 
+
+if __name__ == "__main__":
     main()

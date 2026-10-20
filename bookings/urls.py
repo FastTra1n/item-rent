@@ -7,5 +7,5 @@ app_name = "bookings"
 urlpatterns = [
     path("", views.bookings_list, name="bookings"),
     path("<int:booking_id>/", views.booking_detail, name="detail"),
-    path("statistics/", views.statistics, name="statistics")
+    path("statistics/", views.statistics, name="statistics"),
 ]

@@ -1,6 +1,7 @@
 import sqlite3
 
-DB_PATH = 'data/rently.sqlite'
+DB_PATH = "data/rently.sqlite"
+
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)

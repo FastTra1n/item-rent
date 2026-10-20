@@ -282,7 +282,7 @@ templates/base.html
 
 ```py
 context = {
-  "items": items_list,
+    "items": items_list,
 }
 ```
 
