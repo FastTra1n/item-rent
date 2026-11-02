@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "homepage",
     "items",
     "bookings",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -79,7 +80,7 @@ WSGI_APPLICATION = "rently.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": BASE_DIR / "data" / "rently_orm.sqlite3",
     }
 }
 
