@@ -39,9 +39,9 @@
 </div>
 <div class="card mb-4">
   <div class="card-body">
-    Средняя цена аренды: <strong>{{ summary.avg_price }} руб./д.</strong>,
-    минимальная: {{ summary.min_price }} руб.,
-    максимальная: {{ summary.max_price }} руб./д.
+    Средняя цена аренды: <strong>{{ summary.avg_price|floatformat:2 }} руб./д.</strong>,
+    минимальная: {{ summary.min_price|floatformat:2 }} руб.,
+    максимальная: {{ summary.max_price|floatformat:2 }} руб./д.
     Суммарный залог по каталогу: {{ summary.total_deposit }} руб.
   </div>
 </div>
@@ -57,7 +57,7 @@
   <tbody>
     {% for row in per_item %}
       <tr>
-        <td>{{ row.item_name }}</td>
+        <td>{{ row.name }}</td>
         <td>{{ row.bookings_count }}</td>
       </tr>
     {% empty %}
@@ -79,7 +79,7 @@
   <tbody>
     {% for row in popular %}
       <tr>
-        <td>{{ row.item_name }}</td>
+        <td>{{ row.name }}</td>
         <td>{{ row.bookings_count }}</td>
       </tr>
     {% empty %}
@@ -103,7 +103,7 @@
   <tbody>
     {% for row in per_user %}
       <tr>
-        <td>{{ row.user_name }}</td>
+        <td>{{ row.name }}</td>
         <td>{{ row.bookings_count }}</td>
       </tr>
     {% empty %}

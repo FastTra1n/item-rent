@@ -1,10 +1,15 @@
+from django.db.models import Count, Avg, Min, Max, Sum, Q
+from django.db.models.functions import Round
 from django.shortcuts import render
 
 from db.database import get_connection
 from bookings.models import Booking
+from items.models import Item
+from users.models import User
+
 
 def bookings_list(request):
-    bookings = Booking.objects.all().select_related('item').order_by('-id')
+    bookings = Booking.objects.all().select_related("item").order_by("-id")
 
     context = {
         "bookings": bookings,
@@ -14,7 +19,9 @@ def bookings_list(request):
 
 
 def booking_detail(request, booking_id):
-    booking = Booking.objects.select_related('item', 'user').filter(pk=booking_id).first()
+    booking = (
+        Booking.objects.select_related("item", "user").filter(pk=booking_id).first()
+    )
 
     if booking is None:
         return render(request, "bookings/booking_detail.html", context={}, status=404)
@@ -27,105 +34,47 @@ def booking_detail(request, booking_id):
 
 
 def statistics(request):
-    conn = get_connection()
-    conn.row_factory = sqlite3.Row
+    catalog = Item.objects.aggregate(
+        items_count=Count("id"),
+        avg_price=Round(Avg("price", default=0), 2),
+        min_price=Min("price", default=0),
+        max_price=Max("price", default=0),
+        total_deposit=Sum("deposit", default=0),
+    )
 
-    catalog = conn.execute("""
-        SELECT
-          COUNT(*) AS items_count,
-          ROUND(AVG(price), 2) AS avg_price,
-          MIN(price) AS min_price,
-          MAX(price) AS max_price,
-          SUM(deposit) AS total_deposit
-        FROM items;
-    """).fetchone()
+    active = Booking.objects.aggregate(
+        active_bookings_count=Count("id", filter=Q(is_cancelled=False))
+    )
 
-    active = conn.execute(
-        """
-        SELECT
-          COUNT(*) AS active_bookings_count
-        FROM bookings
-        WHERE is_cancelled = 0;
-        """
-    ).fetchone()
+    cancelled = Booking.objects.aggregate(
+        cancelled_bookings_count=Count("id", filter=Q(is_cancelled=True))
+    )
 
-    cancelled = conn.execute(
-        """
-        SELECT
-          COUNT(*) AS cancelled_bookings_count
-        FROM bookings
-        WHERE is_cancelled = 1;
-        """
-    ).fetchone()
-
-    users_total = conn.execute(
-        """
-        SELECT
-          COUNT(*) AS users_count
-        FROM users;
-        """
-    ).fetchone()
-    per_item = conn.execute(
-        """
-        SELECT
-          items.name AS item_name,
-          COUNT(bookings.id) AS bookings_count
-        FROM items
-        LEFT JOIN bookings ON items.id = bookings.item_id
-          AND bookings.is_cancelled = 0
-        GROUP BY items.id, items.name
-        ORDER BY bookings_count DESC, item_name;
-        """
-    ).fetchall()
-
-    popular = conn.execute(
-        """
-        SELECT
-            items.name AS item_name,
-            COUNT(bookings.id) AS bookings_count
-        FROM items
-        JOIN bookings
-            ON items.id = bookings.item_id
-        WHERE bookings.is_cancelled = 0
-        GROUP BY items.id, items.name
-        HAVING COUNT(bookings.id) >= 2
-        ORDER BY bookings_count DESC;
-        """
-    ).fetchall()
-
-    per_user = conn.execute(
-        """
-        SELECT
-          users.name AS user_name,
-          COUNT(bookings.id) AS bookings_count
-        FROM users
-        LEFT JOIN bookings ON users.id = bookings.user_id
-          AND bookings.is_cancelled = 0
-        GROUP BY users.id, users.name
-        ORDER BY bookings_count DESC, user_name;
-        """
-    ).fetchall()
-
-    top_expensive = conn.execute(
-        """
-        SELECT
-          id,
-          name,
-          price
-        FROM items
-        ORDER BY price DESC, name
-        LIMIT 3;
-        """
-    ).fetchall()
-    conn.close()
+    users_total = User.objects.aggregate(users_count=Count("id"))
+    per_item = (
+        Item.objects.annotate(
+            bookings_count=Count("bookings", filter=Q(bookings__is_cancelled=False))
+        )
+        .values("name", "bookings_count")
+        .order_by("-bookings_count", "name", "pk")
+    )
+    popular = per_item.filter(bookings_count__gte=2)
+    per_user = (
+        User.objects.annotate(
+            bookings_count=Count("bookings", filter=Q(bookings__is_cancelled=False))
+        )
+        .values("name", "bookings_count")
+        .order_by("-bookings_count", "name", "pk")
+    )
+    top_expensive = Item.objects.order_by("-price", "name", "pk")[:3]
 
     context = {
         "summary": {
             "items_count": catalog["items_count"],
-            "avg_price": catalog["avg_price"] or 0,
-            "min_price": catalog["min_price"] or 0,
-            "max_price": catalog["max_price"] or 0,
-            "total_deposit": catalog["total_deposit"] or 0,
+            "avg_price": catalog["avg_price"],
+            "min_price": catalog["min_price"],
+            "max_price": catalog["max_price"],
+            "total_deposit": catalog["total_deposit"],
             "active_bookings_count": active["active_bookings_count"],
             "cancelled_bookings_count": cancelled["cancelled_bookings_count"],
             "users_count": users_total["users_count"],
