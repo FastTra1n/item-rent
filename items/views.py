@@ -1,25 +1,12 @@
-import sqlite3
 from datetime import UTC, datetime
 
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
-from db.database import get_connection
-
-DB_PATH = "data/rently.sqlite"
+from items.models import Item
 
 
 def items_list(request):
-    conn = get_connection()
-    conn.row_factory = sqlite3.Row
-
-    items = conn.execute("""
-        SELECT
-          id,
-          name
-        FROM items
-        ORDER BY name;
-    """).fetchall()
-    conn.close()
+    items = Item.objects.all().order_by("name")
 
     context = {
         "items": items,
@@ -29,50 +16,19 @@ def items_list(request):
 
 
 def item_detail(request, item_id):
-    conn = get_connection()
-    conn.row_factory = sqlite3.Row
-
-    item = conn.execute(
-        """
-        SELECT
-          items.id,
-          items.name,
-          items.price,
-          items.deposit,
-          users.name AS owner_name,
-          users.phone AS owner_phone,
-          users.rating AS owner_rating
-        FROM items
-        JOIN users ON items.owner_id = users.id
-        WHERE items.id = ?;
-    """,
-        [item_id],
-    ).fetchone()
-
+    item = get_object_or_404(Item.objects.select_related("owner"), pk=item_id)
     if item is None:
-        conn.close()
         return render(request, "items/item_detail.html", context={}, status=404)
 
     today = datetime.now(tz=UTC).date().isoformat()
-    active_booking = conn.execute(
-        """
-        SELECT 1
-        FROM bookings
-        WHERE item_id = ?
-          AND is_cancelled = 0
-          AND ? BETWEEN start_date AND end_date;
-    """,
-        [item_id, today],
-    ).fetchone()
-    conn.close()
+    is_occupied = item.bookings.filter(
+        is_cancelled=False, start_date__lte=today, end_date__gte=today
+    ).exists()
 
-    available = active_booking is None
-    status = "доступно" if available else "забронировано"
-    badge = "bg-success" if available else "bg-danger"
     context = {
         "item": item,
-        "status": status,
-        "badge": badge,
+        "status": "доступно" if not is_occupied else "забронировано",
+        "badge": "bg-success" if not is_occupied else "bg-danger",
     }
 
     return render(request, "items/item_detail.html", context, status=200)
