@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Свободные вещи{% endblock %}
+
+{% block content %}
+<h1>Поиск свободных вещей</h1>
+<p>
+  Укажите период аренды. Для одного дня укажите одинаковые даты.
+  Границы периода включаются.
+</p>
+
+<form method="get" class="mb-4 text-start">
+  <div class="mb-3">
+    <label for="start_date" class="form-label">
+      Дата начала
+    </label>
+    <input
+      type="date"
+      id="start_date"
+      name="start_date"
+      value="{{ start_date }}"
+      class="form-control"
+      required
+    >
+  </div>
+
+  <div class="mb-3">
+    <label for="end_date" class="form-label">
+      Дата окончания
+    </label>
+    <input
+      type="date"
+      id="end_date"
+      name="end_date"
+      value="{{ end_date }}"
+      class="form-control"
+      required
+    >
+  </div>
+
+  <button type="submit" class="btn btn-primary">
+    Найти
+  </button>
+  <a
+    href="{% url 'items:available' %}"
+    class="btn btn-outline-secondary"
+  >
+    Сбросить
+  </a>
+</form>
+
+{% if error %}
+  <p class="alert alert-danger">{{ error }}</p>
+{% endif %}
+
+{% if start_date and end_date and not error %}
+  <p>Найдено вещей: {{ items|length }}</p>
+
+  <div class="row">
+    {% for item in items %}
+      {% include "items/includes/item_card.html" %}
+    {% empty %}
+      <div class="col-12">
+        <p class="alert alert-warning">
+          На выбранный период свободных вещей нет.
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
