@@ -1,28 +1,10 @@
-import sqlite3
-
 from django.shortcuts import render
 
 from db.database import get_connection
-
+from bookings.models import Booking
 
 def bookings_list(request):
-    conn = get_connection()
-    conn.row_factory = sqlite3.Row
-
-    bookings = conn.execute("""
-        SELECT
-          bookings.id,
-          strftime('%d.%m.%Y', bookings.start_date)
-            AS start_date_display,
-          strftime('%d.%m.%Y', bookings.end_date)
-            AS end_date_display,
-          bookings.is_cancelled,
-          items.name AS item_name
-        FROM bookings
-        JOIN items ON bookings.item_id = items.id
-        ORDER BY bookings.id DESC;
-    """).fetchall()
-    conn.close()
+    bookings = Booking.objects.all().select_related('item').order_by('-id')
 
     context = {
         "bookings": bookings,
@@ -32,26 +14,7 @@ def bookings_list(request):
 
 
 def booking_detail(request, booking_id):
-    conn = get_connection()
-    conn.row_factory = sqlite3.Row
-
-    booking = conn.execute(
-        """
-        SELECT
-          bookings.id,
-          bookings.start_date,
-          bookings.end_date,
-          bookings.is_cancelled,
-          items.name AS item_name,
-          users.name AS user_name
-        FROM bookings
-        JOIN items ON bookings.item_id = items.id
-        JOIN users ON bookings.user_id = users.id
-        WHERE bookings.id = ?;
-    """,
-        [booking_id],
-    ).fetchone()
-    conn.close()
+    booking = Booking.objects.select_related('item', 'user').filter(pk=booking_id).first()
 
     if booking is None:
         return render(request, "bookings/booking_detail.html", context={}, status=404)

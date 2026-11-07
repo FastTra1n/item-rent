@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 
 from items.models import Item
 
@@ -16,7 +16,7 @@ def items_list(request):
 
 
 def item_detail(request, item_id):
-    item = get_object_or_404(Item.objects.select_related("owner"), pk=item_id)
+    item = Item.objects.select_related("owner").filter(pk=item_id).first()
     if item is None:
         return render(request, "items/item_detail.html", context={}, status=404)
 
