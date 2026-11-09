@@ -1,7 +1,7 @@
 <div class="col-md-4">
   <article class="card item-card mb-3 shadow-sm">
     <div class="card-body">
-      <h5 class="card-title">{{ item.name|default:"Без названия" }}</h5>
+      <h5 class="card-title">{{ item.name|default:"Без названия"|truncatewords:4 }}</h5>
       <p class="card-text"><strong>ID:</strong> {{ item.id }}</p>
       <a
         href="{% url 'items:detail' item.id %}"

@@ -6,6 +6,16 @@
 <h1>Каталог вещей</h1>
 <p class="text-muted">Всего вещей: {{ items|length }}</p>
 
+<form method="get" class="mb-3 d-flex flex-column justify-content-center align-items-center">
+  <label for="q">Название вещи</label>
+  <input id="q" name="q" value="{{ q }}" maxlength="200" class="form-control w-50">
+  <div class="btn-container">
+    <button class="btn btn-primary mt-2" type="submit">Найти</button>
+    <a href="{% url 'items:list' %}" class="btn btn-outline-secondary mt-2">Сбросить</a>
+    <a href="{% url 'items:available' %}" class="btn btn-outline-success mt-2">Свободные вещи</a>
+  </div>
+</form>
+
 <div class="row">
   {% for item in items %}
     {% include "items/includes/item_card.html" %}
