@@ -30,6 +30,7 @@
 - HTML5;
 - CSS и Bootstrap 5.3;
 - JavaScript;
+- SQLite;
 - pytest;
 - ruff.
 
@@ -138,9 +139,11 @@ item-rent/
 │  ├─ migrations/
 │  ├─ templates/
 │  │  ├─ includes/
-│  │  │  └─ booking_status.html
+│  │  │  ├─ booking_status.html
+│  │  │  └─ pagination.html
 │  │  ├─ booking_detail.html
-│  │  └─ booking_list.html
+│  │  ├─ booking_list.html
+│  │  └─ statistics.html
 │  ├─ __init__.py
 │  ├─ admin.py
 │  ├─ apps.py
@@ -151,6 +154,8 @@ item-rent/
 ├─ data/
 │  ├─ bookings.json
 │  ├─ items.json
+│  ├─ rently_orm.sqlite3
+│  ├─ rently.sqlite
 │  └─ users.json
 ├─ homepage/
 │  ├─ migrations/
@@ -173,6 +178,7 @@ item-rent/
 │  ├─ templates/
 │  │  ├─ includes/
 │  │  │  └─ item_card.html
+│  │  ├─ available.html
 │  │  ├─ item_detail.html
 │  │  └─ item_list.html
 │  ├─ __init__.py
@@ -459,15 +465,23 @@ Django-приложение системы бронирования:
 - ruff.
 
 ## Установка зависимостей
-
+Создайте и активируйте виртуальное окружение, а после установки зависимости одним из 2 способов:
 ```bash
 # Через uv
 cd ./item-rent
 uv sync
 
+# Активация окружения
+.venv\Scripts\activate
+
 # Через pip
 cd ./item-rent
+python -m venv venv
+
+# Активация окружения
 .venv\Scripts\activate
+
+# Установка зависимостей
 pip install .
 ```
 
@@ -476,6 +490,10 @@ pip install .
 Веб-версия (Django):
 
 ```bash
+# Примениние миграций
+python manage.py migrate
+
+# Запуск сервера
 python manage.py runserver
 ```
 
