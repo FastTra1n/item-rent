@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.core.paginator import Paginator
-from django.db.models import Count, Avg, Min, Max, Sum, Q
+from django.db.models import Avg, Count, F, Max, Min, Q, Sum
 from django.db.models.functions import Round
 from django.shortcuts import render
 
@@ -19,9 +19,7 @@ def bookings_list(request):
 
     error = None
 
-    bookings = Booking.objects.filter(
-        is_cancelled=False,
-    ).select_related("item", "user")
+    bookings = Booking.objects.active()
 
     if booking_date:
         try:
@@ -36,10 +34,7 @@ def bookings_list(request):
         except ValueError:
             error = "Укажите корректную дату."
         else:
-            bookings = bookings.filter(
-                start_date__lte=selected_date,
-                end_date__gte=selected_date,
-            )
+            bookings = bookings.for_date(selected_date)
 
     try:
         if item_id:
@@ -62,7 +57,21 @@ def bookings_list(request):
     if sort not in sort_fields:
         sort = "date"
 
-    bookings = bookings.order_by(sort_fields[sort], "pk")
+    bookings = (
+        bookings.annotate(
+            item_name=F("item__name"),
+            user_name=F("user__name"),
+        )
+        .values(
+            "id",
+            "item_name",
+            "user_name",
+            "start_date",
+            "end_date",
+            "status",
+        )
+        .order_by(sort_fields[sort], "pk")
+    )
 
     paginator = Paginator(bookings, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -105,18 +114,27 @@ def statistics(request):
         total_deposit=Sum("deposit", default=0),
     )
 
-    active = Booking.objects.aggregate(
-        active_bookings_count=Count("id", filter=Q(is_cancelled=False))
-    )
-
-    cancelled = Booking.objects.aggregate(
-        cancelled_bookings_count=Count("id", filter=Q(is_cancelled=True))
+    statuses = Booking.objects.aggregate(
+        active_bookings_count=Count(
+            "id",
+            filter=Q(status=Booking.Status.ACTIVE),
+        ),
+        cancelled_bookings_count=Count(
+            "id",
+            filter=Q(status=Booking.Status.CANCELLED),
+        ),
+        completed_bookings_count=Count(
+            "id",
+            filter=Q(status=Booking.Status.COMPLETED),
+        ),
     )
 
     users_total = User.objects.aggregate(users_count=Count("id"))
     per_item = (
         Item.objects.annotate(
-            bookings_count=Count("bookings", filter=Q(bookings__is_cancelled=False))
+            bookings_count=Count(
+                "bookings", filter=Q(bookings__status=Booking.Status.ACTIVE)
+            )
         )
         .values("name", "bookings_count")
         .order_by("-bookings_count", "name", "pk")
@@ -124,7 +142,9 @@ def statistics(request):
     popular = per_item.filter(bookings_count__gte=2)
     per_user = (
         User.objects.annotate(
-            bookings_count=Count("bookings", filter=Q(bookings__is_cancelled=False))
+            bookings_count=Count(
+                "bookings", filter=Q(bookings__status=Booking.Status.ACTIVE)
+            )
         )
         .values("name", "bookings_count")
         .order_by("-bookings_count", "name", "pk")
@@ -138,8 +158,9 @@ def statistics(request):
             "min_price": catalog["min_price"],
             "max_price": catalog["max_price"],
             "total_deposit": catalog["total_deposit"],
-            "active_bookings_count": active["active_bookings_count"],
-            "cancelled_bookings_count": cancelled["cancelled_bookings_count"],
+            "active_bookings_count": statuses["active_bookings_count"],
+            "cancelled_bookings_count": statuses["cancelled_bookings_count"],
+            "completed_bookings_count": statuses["completed_bookings_count"],
             "users_count": users_total["users_count"],
         },
         "per_item": per_item,

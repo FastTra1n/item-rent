@@ -5,6 +5,28 @@ from items.models import Item
 from users.models import User
 
 
+class BookingQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(status=self.model.Status.ACTIVE)
+
+    def cancelled(self):
+        return self.filter(status=self.model.Status.CANCELLED)
+
+    def completed(self):
+        return self.filter(status=self.model.Status.COMPLETED)
+
+    def for_date(self, selected_date):
+        return self.filter(
+            start_date__lte=selected_date,
+            end_date__gte=selected_date,
+        )
+
+
+class BookingManager(
+    models.Manager.from_queryset(BookingQuerySet)
+):
+    pass
+
 class Booking(models.Model):
     item = models.ForeignKey(
         Item, on_delete=models.PROTECT, related_name="bookings", verbose_name="Вещь"
@@ -31,20 +53,22 @@ class Booking(models.Model):
         default=Status.ACTIVE,
     )
 
+    objects = BookingManager()
+
     def clean(self):
         super().clean()
         if self.start_date and self.end_date and self.end_date < self.start_date:
             raise ValidationError({"end_date": "Окончание раньше начала аренды."})
 
     def cancel(self):
-        self.is_cancelled = True
-        self.save(update_fields=["is_cancelled"])
+        self.status = self.Status.CANCELLED
+        self.save(update_fields=["status"])
 
     def __str__(self):
-        status = "Отменено" if self.is_cancelled else "Активно"
         return (
             f"Аренда #{self.pk}: {self.item.name} | "
-            f"{self.start_date} - {self.end_date} | {self.user.name} [{status}]"
+            f"{self.start_date} - {self.end_date} | "
+            f"{self.user.name} [{self.get_status_display()}]"
         )
 
     class Meta:

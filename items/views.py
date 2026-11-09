@@ -24,9 +24,7 @@ def item_detail(request, item_id):
         return render(request, "items/item_detail.html", context={}, status=404)
 
     today = datetime.now(tz=UTC).date().isoformat()
-    is_occupied = item.bookings.filter(
-        is_cancelled=False, start_date__lte=today, end_date__gte=today
-    ).exists()
+    is_occupied = item.bookings.active().for_date(today).exists()
 
     context = {
         "item": item,
@@ -68,11 +66,14 @@ def available_items(request):
             except ValueError:
                 error = "Укажите корректную дату."
             else:
-                booked_item_ids = Booking.objects.filter(
-                    is_cancelled=False, start_date__lte=end, end_date__gte=start
-                ).values_list(
-                    "id",
-                    flat=True,
+                booked_item_ids = (
+                    Booking.objects
+                    .active()
+                    .filter(
+                        start_date__lte=end,
+                        end_date__gte=start,
+                    )
+                    .values_list("item_id", flat=True)
                 )
 
                 items_list = Item.objects.exclude(
