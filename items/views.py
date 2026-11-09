@@ -13,10 +13,7 @@ def items_list(request):
     if q:
         items = items.filter(name__iregex=re.escape(q))
 
-    context = {
-        "items": items,
-        "q": q
-    }
+    context = {"items": items, "q": q}
 
     return render(request, "items/item_list.html", context)
 

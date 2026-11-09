@@ -6,8 +6,100 @@
 <h1>Список бронирований</h1>
 <p class="text-muted">Всего бронирований: {{ page_obj.paginator.count }}</p>
 
+<form
+  method="get"
+  action="{% url 'bookings:bookings' %}"
+  class="mb-4 text-start d-flex flex-column justify-content-center align-items-center"
+>
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label for="date" class="form-label">
+        Дата аренды
+      </label>
+      <input
+        type="date"
+        id="date"
+        name="date"
+        value="{{ booking_date }}"
+        class="form-control"
+      >
+    </div>
+
+    <div class="col-md-3">
+      <label for="item" class="form-label">Вещь</label>
+      <select id="item" name="item" class="form-select">
+        <option value="">Все вещи</option>
+
+        {% for item in items %}
+          <option
+            value="{{ item.pk }}"
+            {% if selected_item == item.pk|stringformat:"s" %}
+              selected
+            {% endif %}
+          >
+            {{ item.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label for="user" class="form-label">Арендатор</label>
+      <select id="user" name="user" class="form-select">
+        <option value="">Все арендаторы</option>
+
+        {% for renter in users %}
+          <option
+            value="{{ renter.pk }}"
+            {% if selected_user == renter.pk|stringformat:"s" %}
+              selected
+            {% endif %}
+          >
+            {{ renter.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label for="sort" class="form-label">Сортировать по</label>
+      <select id="sort" name="sort" class="form-select">
+        <option value="date" {% if sort == "date" %}selected{% endif %}>
+          Дате
+        </option>
+        <option value="item" {% if sort == "item" %}selected{% endif %}>
+          Вещи
+        </option>
+        <option value="user" {% if sort == "user" %}selected{% endif %}>
+          Арендатору
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div class="btn-container">
+    <button type="submit" class="btn btn-primary mt-3">
+      Применить
+    </button>
+    <a
+      href="{% url 'bookings:bookings' %}"
+      class="btn btn-outline-secondary mt-3"
+    >
+      Сбросить
+    </a>
+  </div>
+</form>
+
+{% if error %}
+  <p class="alert alert-danger">{{ error }}</p>
+{% endif %}
+
+<p class="text-muted">
+  Найдено бронирований: {{ page_obj.paginator.count }}
+</p>
+
 <ul class="list-group">
-  {% for booking in bookings %}
+  {% for booking in page_obj %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
       <div>
         <a

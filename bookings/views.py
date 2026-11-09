@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.core.paginator import Paginator
 from django.db.models import Count, Avg, Min, Max, Sum, Q
 from django.db.models.functions import Round
@@ -10,13 +12,70 @@ from users.models import User
 
 
 def bookings_list(request):
-    bookings = Booking.objects.all().select_related("item").order_by("-id")
+    booking_date = request.GET.get("date", "").strip()
+    item_id = request.GET.get("item", "").strip()
+    user_id = request.GET.get("user", "").strip()
+    sort = request.GET.get("sort", "date").strip()
+
+    error = None
+
+    bookings = Booking.objects.filter(
+        is_cancelled=False,
+    ).select_related("item", "user")
+
+    if booking_date:
+        try:
+            selected_date = (
+                datetime.strptime(
+                    booking_date,
+                    "%Y-%m-%d",
+                )
+                .date()
+                .isoformat()
+            )
+        except ValueError:
+            error = "Укажите корректную дату."
+        else:
+            bookings = bookings.filter(
+                start_date__lte=selected_date,
+                end_date__gte=selected_date,
+            )
+
+    try:
+        if item_id:
+            bookings = bookings.filter(item_id=int(item_id))
+
+        if user_id:
+            bookings = bookings.filter(user_id=int(user_id))
+    except ValueError:
+        error = "Некорректный идентификатор вещи или арендатора."
+
+    if error:
+        bookings = bookings.none()
+
+    sort_fields = {
+        "date": "start_date",
+        "item": "item__name",
+        "user": "user__name",
+    }
+
+    if sort not in sort_fields:
+        sort = "date"
+
+    bookings = bookings.order_by(sort_fields[sort], "pk")
+
     paginator = Paginator(bookings, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
 
     context = {
-        "bookings": page_obj,
-        "page_obj": page_obj
+        "page_obj": page_obj,
+        "booking_date": booking_date,
+        "selected_item": item_id,
+        "selected_user": user_id,
+        "sort": sort,
+        "error": error,
+        "items": Item.objects.order_by("name", "pk"),
+        "users": User.objects.order_by("name", "pk"),
     }
 
     return render(request, "bookings/booking_list.html", context)
