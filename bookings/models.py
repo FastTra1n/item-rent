@@ -19,6 +19,18 @@ class Booking(models.Model):
     end_date = models.DateField("Дата окончания аренды")
     is_cancelled = models.BooleanField("Бронирование отменено", default=False)
 
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Активно"
+        CANCELLED = "cancelled", "Отменено"
+        COMPLETED = "completed", "Завершено"
+
+    status = models.CharField(
+        "Статус бронирования",
+        max_length=12,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
+
     def clean(self):
         super().clean()
         if self.start_date and self.end_date and self.end_date < self.start_date:
