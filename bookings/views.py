@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.db.models import Count, Avg, Min, Max, Sum, Q
 from django.db.models.functions import Round
 from django.shortcuts import render
@@ -10,9 +11,12 @@ from users.models import User
 
 def bookings_list(request):
     bookings = Booking.objects.all().select_related("item").order_by("-id")
+    paginator = Paginator(bookings, 5)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     context = {
-        "bookings": bookings,
+        "bookings": page_obj,
+        "page_obj": page_obj
     }
 
     return render(request, "bookings/booking_list.html", context)

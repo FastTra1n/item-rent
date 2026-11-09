@@ -1,0 +1,25 @@
+{% if page_obj.paginator.num_pages > 1 %}
+<nav aria-label="Страницы бронирований" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="{% querystring page=page_obj.previous_page_number %}">Назад</a>
+      </li>
+    {% endif %}
+    {% for number in page_obj.paginator.page_range %}
+      <li class="page-item {% if number == page_obj.number %}active{% endif %}">
+        {% if number == page_obj.number %}
+          <span class="page-link" aria-current="page">{{ number }}</span>
+        {% else %}
+          <a class="page-link" href="{% querystring page=number %}">{{ number }}</a>
+        {% endif %}
+      </li>
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{% querystring page=page_obj.next_page_number %}">Далее</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
