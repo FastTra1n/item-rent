@@ -4,7 +4,7 @@
       <h5 class="card-title">{{ item.name|default:"Без названия"|truncatewords:4 }}</h5>
       <p class="card-text"><strong>ID:</strong> {{ item.id }}</p>
       <a
-        href="{% url 'items:detail' item.id %}"
+        href="{{ item.get_absolute_url }}"
         class="btn btn-outline-primary btn-sm"
         >Подробнее</a
       >

@@ -1,7 +1,8 @@
 import re
 from datetime import UTC, datetime
 
-from django.shortcuts import render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, render
 
 from items.models import Item
 from bookings.models import Booking
@@ -18,10 +19,19 @@ def items_list(request):
     return render(request, "items/item_list.html", context)
 
 
-def item_detail(request, item_id):
-    item = Item.objects.select_related("owner").filter(pk=item_id).first()
-    if item is None:
-        return render(request, "items/item_detail.html", context={}, status=404)
+def item_detail(request, slug):
+    try:
+        item = get_object_or_404(
+            Item.objects.select_related("owner"),
+            slug=slug,
+        )
+    except Http404:
+        return render(
+            request,
+            "items/item_detail.html",
+            {"item": None},
+            status=404,
+        )
 
     today = datetime.now(tz=UTC).date().isoformat()
     is_occupied = item.bookings.active().for_date(today).exists()
