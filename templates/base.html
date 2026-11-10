@@ -16,7 +16,7 @@
     <div class="container text-center">
       <img
         src="{% static 'homepage/img/logo.svg' %}"
-        alt="Rently"
+        alt="{{ site_name }}"
         class="rently-logo"
       />
 
@@ -25,7 +25,7 @@
       <main class="container my-4">{% block content %} {% endblock %}</main>
 
       <footer class="container text-center mt-4 mb-3 text-muted">
-        <p>&copy; <span id="current-year"></span> Rently</p>
+        <p>&copy; <span id="current-year"></span> {{ site_name }}</p>
       </footer>
 
       <script src="{% static 'homepage/js/main.js' %}"></script>
