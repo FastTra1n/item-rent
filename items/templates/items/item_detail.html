@@ -12,6 +12,15 @@
 {% if item %}
   <div class="card shadow">
     <div class="card-body">
+      {% if item.image %}
+        <img
+          src="{{ item.image.url }}"
+          alt="{{ item.name }}"
+          class="img-fluid rounded mb-3"
+        >
+      {% else %}
+        <p class="text-muted">Изображение не загружено.</p>
+      {% endif %}
       <h1 class="card-title">{{ item.name|default:"Без названия" }}</h1>
       <p class="card-text">Цена аренды: <strong>{{ item.price }} руб./д.</strong></p>
         <p class="card-text">Залоговая стоимость: <strong>{{ item.deposit }} руб.</strong></p>

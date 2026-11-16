@@ -2,11 +2,11 @@ import re
 from datetime import UTC, datetime
 
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 
 from items.models import Item
 from bookings.models import Booking
-
+from .forms import ItemForm
 
 def items_list(request):
     q = request.GET.get("q", "").strip()[:200]
@@ -98,3 +98,22 @@ def available_items(request):
     }
 
     return render(request, "items/available.html", context)
+
+def item_create(request):
+    if request.method == "POST":
+        form = ItemForm(
+            request.POST,
+            request.FILES,
+        )
+
+        if form.is_valid():
+            item = form.save()
+            return redirect(item.get_absolute_url())
+    else:
+        form = ItemForm()
+
+    return render(
+        request,
+        "items/item_form.html",
+        {"form": form},
+    )

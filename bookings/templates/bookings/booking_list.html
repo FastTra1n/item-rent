@@ -61,7 +61,7 @@
         <span class="text-muted ms-2"
           >({{ booking.item_name }} c {{ booking.start_date|date:"d.m.Y" }} по {{ booking.end_date|date:"d.m.Y" }})</span
         >
-        <div class="d-flex gap-2">
+        <div class="mt-2 mb-2 d-flex gap-2">
           <a
             href="{% url 'bookings:booking_update' booking.id %}"
             class="btn btn-outline-warning btn-sm"
