@@ -30,6 +30,12 @@ class Item(models.Model):
         editable=False,
         unique=True
     )
+    image = models.ImageField(
+        "Изображение",
+        upload_to="items/",
+        blank=True,
+        null=True,
+    )
 
     def save(self, *args, **kwargs):
         if self.slug:
