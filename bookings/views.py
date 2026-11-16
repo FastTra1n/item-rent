@@ -9,47 +9,51 @@ from db.database import get_connection
 from bookings.models import Booking
 from items.models import Item
 from users.models import User
+from .forms import BookingFilterForm
 
 
 def bookings_list(request):
-    booking_date = request.GET.get("date", "").strip()
-    item_id = request.GET.get("item", "").strip()
-    user_id = request.GET.get("user", "").strip()
-    sort = request.GET.get("sort", "date").strip()
-
-    error = None
+    # booking_date = request.GET.get("date", "").strip()
+    # item_id = request.GET.get("item", "").strip()
+    # user_id = request.GET.get("user", "").strip()
+    # sort = request.GET.get("sort", "date").strip()
+    form = BookingFilterForm(request.GET or None)
 
     bookings = Booking.objects.active()
 
-    if booking_date:
-        try:
-            selected_date = (
-                datetime.strptime(
-                    booking_date,
-                    "%Y-%m-%d",
-                )
-                .date()
-                .isoformat()
-            )
-        except ValueError:
-            error = "Укажите корректную дату."
-        else:
-            bookings = bookings.for_date(selected_date)
+    booking_date = None
+    item_id = None
+    user_id = None
+    sort = "date"
+    error = None
 
-    try:
+    if form.is_valid():
+        booking_date = form.cleaned_data["date"]
+        item = form.cleaned_data["item"]
+        user = form.cleaned_data["user"]
+        sort = form.cleaned_data["sort"] or "date"
+
+        item_id = item.pk if item else None
+        user_id = user.pk if user else None
+
+        if booking_date:
+            bookings = bookings.for_date(booking_date)
+
         if item_id:
-            bookings = bookings.filter(item_id=int(item_id))
+            bookings = bookings.filter(item_id=item_id)
 
         if user_id:
-            bookings = bookings.filter(user_id=int(user_id))
-    except ValueError:
-        error = "Некорректный идентификатор вещи или арендатора."
+            bookings = bookings.filter(user_id=user_id)
+
+    elif form.is_bound:
+        error = "Проверьте корректность параметров фильтрации."
 
     if error:
         bookings = bookings.none()
 
     sort_fields = {
         "date": "start_date",
+        "date_desc": "-start_date",
         "item": "item__name",
         "user": "user__name",
     }
@@ -77,14 +81,9 @@ def bookings_list(request):
     page_obj = paginator.get_page(request.GET.get("page"))
 
     context = {
+        "form": form,
         "page_obj": page_obj,
-        "booking_date": booking_date,
-        "selected_item": item_id,
-        "selected_user": user_id,
-        "sort": sort,
         "error": error,
-        "items": Item.objects.order_by("name", "pk"),
-        "users": User.objects.order_by("name", "pk"),
     }
 
     return render(request, "bookings/booking_list.html", context)
