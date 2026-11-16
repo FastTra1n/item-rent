@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if booking %}
+    Редактирование бронирования
+  {% else %}
+    Создание бронирования
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<h1>
+  {% if booking %}
+    Редактирование бронирования №{{ booking.id }}
+  {% else %}
+    Создание бронирования
+  {% endif %}
+</h1>
+
+<form method="post" class="text-start">
+  {% csrf_token %}
+
+  {% for error in form.non_field_errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endfor %}
+
+  {% for field in form %}
+    <div class="mb-3">
+      {{ field.label_tag }}
+      {{ field }}
+
+      {% if field.help_text %}
+        <div class="form-text">{{ field.help_text }}</div>
+      {% endif %}
+
+      {% for error in field.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+  <button type="submit" class="btn btn-primary">
+    {% if booking %}
+      Сохранить изменения
+    {% else %}
+      Создать бронирование
+    {% endif %}
+  </button>
+
+  <a
+    href="{% url 'bookings:bookings' %}"
+    class="btn btn-outline-secondary"
+  >
+    К списку бронирований
+  </a>
+</form>
+{% endblock %}

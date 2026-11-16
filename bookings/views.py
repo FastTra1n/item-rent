@@ -1,22 +1,19 @@
-from datetime import datetime
-
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, F, Max, Min, Q, Sum
 from django.db.models.functions import Round
-from django.shortcuts import render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
 
-from db.database import get_connection
 from bookings.models import Booking
 from items.models import Item
 from users.models import User
-from .forms import BookingFilterForm
+
+from .forms import BookingFilterForm, BookingForm
 
 
 def bookings_list(request):
-    # booking_date = request.GET.get("date", "").strip()
-    # item_id = request.GET.get("item", "").strip()
-    # user_id = request.GET.get("user", "").strip()
-    # sort = request.GET.get("sort", "date").strip()
     form = BookingFilterForm(request.GET or None)
 
     bookings = Booking.objects.active()
@@ -102,6 +99,127 @@ def booking_detail(request, booking_id):
     }
 
     return render(request, "bookings/booking_detail.html", context, status=200)
+
+
+def booking_create(request):
+    if request.method == "POST":
+        form = BookingForm(request.POST)
+
+        if form.is_valid():
+            item = form.cleaned_data["item"]
+            start = form.cleaned_data["start_date"]
+            end = form.cleaned_data["end_date"]
+
+            is_booked = (
+                Booking.objects.active()
+                .filter(
+                    item=item,
+                    start_date__lte=end,
+                    end_date__gte=start,
+                )
+                .exists()
+            )
+
+            if is_booked:
+                form.add_error(
+                    None,
+                    "Вещь уже забронирована на выбранный период.",
+                )
+            else:
+                form.save()
+                return redirect("bookings:bookings")
+    else:
+        today = timezone.localdate()
+
+        form = BookingForm(
+            initial={
+                "start_date": today,
+                "end_date": today,
+            },
+        )
+
+    return render(
+        request,
+        "bookings/booking_form.html",
+        {"form": form},
+    )
+
+
+def booking_update(request, booking_id):
+    try:
+        booking = get_object_or_404(
+            Booking.objects.active(),
+            pk=booking_id,
+        )
+    except Http404:
+        return render(
+            request,
+            "bookings/booking_detail.html",
+            {},
+            status=404,
+        )
+
+    if request.method == "POST":
+        form = BookingForm(
+            request.POST,
+            instance=booking,
+        )
+
+        if form.is_valid():
+            item = form.cleaned_data["item"]
+            start = form.cleaned_data["start_date"]
+            end = form.cleaned_data["end_date"]
+
+            is_booked = (
+                Booking.objects.active()
+                .filter(
+                    item=item,
+                    start_date__lte=end,
+                    end_date__gte=start,
+                )
+                .exclude(pk=booking.pk)
+                .exists()
+            )
+
+            if is_booked:
+                form.add_error(
+                    None,
+                    "Вещь уже забронирована на выбранный период.",
+                )
+            else:
+                form.save()
+                return redirect("bookings:bookings")
+    else:
+        form = BookingForm(instance=booking)
+
+    return render(
+        request,
+        "bookings/booking_form.html",
+        {
+            "form": form,
+            "booking": booking,
+        },
+    )
+
+
+@require_POST
+def booking_cancel(request, booking_id):
+    try:
+        booking = get_object_or_404(
+            Booking.objects.active(),
+            pk=booking_id,
+        )
+    except Http404:
+        return render(
+            request,
+            "bookings/booking_detail.html",
+            {},
+            status=404,
+        )
+
+    booking.cancel()
+
+    return redirect("bookings:bookings")
 
 
 def statistics(request):

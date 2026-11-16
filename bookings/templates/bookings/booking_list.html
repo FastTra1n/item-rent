@@ -4,7 +4,10 @@
 
 {% block content %}
 <h1>Список бронирований</h1>
-<p class="text-muted">Всего бронирований: {{ page_obj.paginator.count }}</p>
+<p class="text-muted">Найдено активных бронирований: {{ page_obj.paginator.count }}</p>
+<a href="{% url 'bookings:booking_create' %}" class="btn btn-primary mb-3">
+  Создать бронирование
+</a>
 
 <form
   method="get"
@@ -58,6 +61,25 @@
         <span class="text-muted ms-2"
           >({{ booking.item_name }} c {{ booking.start_date|date:"d.m.Y" }} по {{ booking.end_date|date:"d.m.Y" }})</span
         >
+        <div class="d-flex gap-2">
+          <a
+            href="{% url 'bookings:booking_update' booking.id %}"
+            class="btn btn-outline-warning btn-sm"
+          >
+            Редактировать
+          </a>
+        
+          <form
+            method="post"
+            action="{% url 'bookings:booking_cancel' booking.id %}"
+          >
+            {% csrf_token %}
+        
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+              Отменить
+            </button>
+          </form>
+        </div>
       </div>
       {% include "bookings/includes/booking_status.html" %}
     </li>
